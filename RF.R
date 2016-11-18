@@ -21,3 +21,5 @@ train[, c(118, 131)] <- num_scale_svd$u
 library(randomForest)
 rf1 = randomForest(loss ~ ., data = train_encoded, mtry = 50)
 str(train_encoded, list.len = ncol(train))
+
+# rf with only numeric
