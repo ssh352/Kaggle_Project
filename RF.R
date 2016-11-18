@@ -1,6 +1,8 @@
 # load the training data
 setwd("C:/Users/Xinyuan Wu/Desktop/Xinyuan's Repo/Kaggle_Project")
 train <- read.csv("data/train.csv/train.csv")
+train_encoded <- read.csv("data/train.csv/train_encoded.csv")
+train_encoded$loss <- train[, 'loss']
 
 # extract numeric variables
 num <- train[, -c(1: 117, 132)]
@@ -17,5 +19,5 @@ train[, c(118, 131)] <- num_scale_svd$u
 
 # try rf
 library(randomForest)
-rf1 = randomForest(loss ~ ., data = train, mtry = 50)
-str(train, list.len = ncol(train))
+rf1 = randomForest(loss ~ ., data = train_encoded, mtry = 50)
+str(train_encoded, list.len = ncol(train))
