@@ -5,10 +5,11 @@ library(Metrics)
 
 ID = 'id'
 TARGET = 'loss'
-SEED = 0
+SEED = 1314
 
-TRAIN_FILE = "train.csv"
-TEST_FILE = "test.csv"
+setwd("C:/Users/Xinyuan Wu/Desktop/Xinyuan's Repo/Kaggle_Project")
+TRAIN_FILE = "data/train.csv/train.csv"
+TEST_FILE = "data/test.csv/test.csv"
 SUBMISSION_FILE = "sample_submission.csv"
 
 
@@ -43,7 +44,7 @@ dtest = xgb.DMatrix(as.matrix(x_test))
 
 
 xgb_params = list(
-  seed = 0,
+  seed = 1314,
   colsample_bytree = 0.7,
   subsample = 0.7,
   eta = 0.075,
@@ -79,6 +80,6 @@ gbdt = xgb.train(xgb_params, dtrain, best_nrounds)
 
 submission = fread(SUBMISSION_FILE, colClasses = c("integer", "numeric"))
 submission$loss = exp(predict(gbdt,dtest))
-write.csv(submission,'xgb_starter_v2.sub.csv',row.names = FALSE)
+write.csv(submission,'xgb_starter_v2.hehehe.csv',row.names = FALSE)
 
 #1126.19439 on PLB
