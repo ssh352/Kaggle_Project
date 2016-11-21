@@ -58,7 +58,7 @@ y = train.iloc[:, -1]
 
 print "start"
 test = pd.read_csv("test_proc.csv")
-X_real_test = test.iloc
+X_real_test = test
 
 print "model start"
 RF_model = RandomForestRegressor(n_estimators=1000, n_jobs=12, random_state=SEED)
