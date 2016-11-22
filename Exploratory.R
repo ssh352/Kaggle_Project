@@ -98,7 +98,7 @@ train_processed <- data.frame(dmcat_train_proc, train[, 117:131])
 test_processed <- data.frame(dmcat_test_proc, test[, 117:130])
 
 # data subset
-set.seed(0)
+set.seed(1314)
 train_index <- sample(1:nrow(train_processed), 8*nrow(train_processed)/10)
 test_index <- -train_index
 train <- train_processed[train_index, ]
