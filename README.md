@@ -1,7 +1,6 @@
-# Kaggle_Project
-For All-state Kaggle Project
-
+# Kaggle_Project  
 Workflow for stacking:  
+  
 for every model:
   1. use the processed data (processed.zip)
   2. tune parameters using train.csv (cross-validate)
