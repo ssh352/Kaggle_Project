@@ -107,6 +107,7 @@ submit <- test_processed
 
 write.csv(train, file = 'train.csv', row.names = F)
 write.csv(test, file = 'test.csv', row.names = F)
+write.csv(train_processed, file = 'train_full.csv', row.names = F)
 write.csv(submit, file = 'submit.csv', row.names = F)
 
 
