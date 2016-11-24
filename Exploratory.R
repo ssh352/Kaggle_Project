@@ -118,8 +118,7 @@ write.csv(train_processed, file = 'train_full.csv', row.names = F)
 write.csv(submit, file = 'submit.csv', row.names = F)
 
 ## encoding 2
-library(plyr)
-str(submit_encoded2, list.len = ncol(submit_encoded2)) 
+#str(submit_encoded2, list.len = ncol(submit_encoded2)) 
 
 submit2 <- submit
 submit2$loss <- NA
@@ -141,7 +140,7 @@ find_different <- function(x, y) {
 }
 
 filter_cat <- function(x, remove) {
-    return(mapvalues(x, remove, rep('ZZ', length(remove))))
+    return(mapvalues(x, remove, rep('NA', length(remove))))
 }
 
 sum(sapply(full[, 1:116], function(x) sum(x == 'NA')))   ### before
@@ -171,7 +170,60 @@ write.csv(train_encoded2, file = 'train_full_encode2.csv', row.names = F)
 write.csv(submit_version2, file = 'submit_encode2.csv', row.names = F)
 
 
+## encoding 2 version 2
+submit2 <- submit
+submit2$loss <- NA
+submit2_cat <- submit2[, 1:116]
+submit2_num <- submit2[, 117:131]
+submit2_cat_conv <- data.frame(lapply(submit2_cat, as.character), 
+                               loss = submit2$loss, stringsAsFactors = FALSE)
 
+train2 <- train
+train2_cat <- train2[, 1:116]
+train2_num <- train2[, 117:131]
+train2_cat_conv <- data.frame(lapply(train2_cat, as.character),
+                              loss = train2$loss, stringsAsFactors = FALSE)
+
+full <- rbind(train2_cat_conv, submit2_cat_conv)
+
+find_different <- function(x, y) {
+    return(c(setdiff(x, y), setdiff(y, x)))
+}
+
+filter_cat <- function(x, remove) {
+    return(mapvalues(x, remove, rep('ZZZ', length(remove))))
+}
+
+sum(sapply(full[, 1:116], function(x) sum(x == 'ZZZ')))   ### before
+for (i in 1:116) {
+    remove <- find_different(train2_cat_conv[, i], submit2_cat_conv[, i])
+    if (length(unique(train2_cat_conv[, i])) != length(unique(submit2_cat_conv[, i])) &
+        length(remove) > 0) {
+        print(paste('========', i))
+        print(remove)
+        full[, i] <- filter_cat(full[, i], remove)
+        print('===================================================================')}
+}
+sum(sapply(full[, 1:116], function(x) sum(x == 'ZZZ')))   ### after
+
+full_factorize <- data.frame(lapply(full[, 1:116], function(x) as.numeric(factor(x))),
+                             loss = full$loss, stringsAsFactors = FALSE)
+
+train_encoded2 <- cbind(id = train_full_id, 
+                        full_factorize[!is.na(full_factorize$loss), 1:116], 
+                        train2_num)
+submit_encoded2 <- cbind(id = submit_id,
+                         full_factorize[is.na(full_factorize$loss), 1:116], 
+                         submit2[, 117:130])
+
+train_version2 <- train_encoded2[train_index, ]
+test_version2 <- train_encoded2[test_index, ]
+submit_version2 <- submit_encoded2
+
+write.csv(train_version2, file = 'train_encode2_v2.csv', row.names = F)
+write.csv(test_version2, file = 'test_encode2_v2.csv', row.names = F)
+write.csv(train_encoded2, file = 'train_full_encode2_v2.csv', row.names = F)
+write.csv(submit_version2, file = 'submit_encode2_v2.csv', row.names = F)
 
 
 
