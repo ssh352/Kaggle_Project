@@ -1,9 +1,11 @@
 # load the training data
 setwd("C:/Users/Xinyuan Wu/Desktop/Xinyuan's Repo/Kaggle_Project")
 train <- read.csv("data/train.csv/train.csv")
-test <- read.csv("data/test.csv/test.csv")
+submit <- read.csv("data/test.csv/test.csv")
 num_train <- train[, -c(1: 117, 132)]
-num_test <- test[, -c(1:117)]
+num_submit <- submit[, -c(1:117)]
+train_full_id <- train[, 1]
+submit_id <- submit[, 1]
 # str(num_train); str(num_test)
 
 ## correlation plot
@@ -55,14 +57,15 @@ num_test <- test[, -c(1:117)]
 
 
 ## Feature Selection
+suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(caret))
 # str(dm_train, list.len = ncol(dm_train))   ### used to check the complete structure
 
 train <- train %>% select(-id)   ### remove id column
-test <- test %>% select(-id)
+submit <- submit %>% select(-id)
 cat_train <- train[, 1:116]
-cat_test <- test[, 1:116]
+cat_submit <- submit[, 1:116]
 
 # dm_train <- model.matrix(loss ~ ., data = train)   ### convert cate to dummy
 # dm_test <- model.matrix(~ ., data = test)
@@ -75,8 +78,8 @@ cat_test <- test[, 1:116]
 
 dmcat_train <- model.matrix(~ . + 0, data = cat_train, 
                             contrasts.arg = lapply(cat_train, contrasts, contrasts = FALSE))
-dmcat_test <- model.matrix(~ . + 0, data = cat_test, 
-                           contrasts.arg = lapply(cat_test, contrasts, contrasts = FALSE))
+dmcat_submit <- model.matrix(~ . + 0, data = cat_submit, 
+                           contrasts.arg = lapply(cat_submit, contrasts, contrasts = FALSE))
 preProc_obj <- preProcess(dmcat_train, method = "nzv"); preProc_obj
 dmcat_train_proc <- predict(preProc_obj, dmcat_train); dim(dmcat_train_proc)
 # dmcat_test_proc <- predict(preProc_obj, dmcat_test); dim(dmcat_test_proc)
@@ -92,23 +95,84 @@ find_same_col <- function(subset, fullset) {
     return(fullset)
 }
 
-dmcat_test_proc <- find_same_col(dmcat_train_proc, as.data.frame(dmcat_test))
+dmcat_submit_proc <- find_same_col(dmcat_train_proc, as.data.frame(dmcat_submit))
 
 train_processed <- data.frame(dmcat_train_proc, train[, 117:131])
-test_processed <- data.frame(dmcat_test_proc, test[, 117:130])
+submit_processed <- data.frame(dmcat_submit_proc, submit[, 117:130])
 
 # data subset
 set.seed(1314)
-train_index <- sample(1:nrow(train_processed), 8*nrow(train_processed)/10)
+train_index <- sample(1:nrow(train), 8*nrow(train)/10)
 test_index <- -train_index
+train_id <- train_full_id[train_index]
+test_id <- train_full_id[test_index]
 train <- train_processed[train_index, ]
 test <- train_processed[test_index, ]
-submit <- test_processed
+submit <- submit_processed
 
+write.csv(data.frame(train_id), file = "train_id.csv", row.names = F)
+write.csv(data.frame(test_id), file = "test_id.csv", row.names = F)
 write.csv(train, file = 'train.csv', row.names = F)
 write.csv(test, file = 'test.csv', row.names = F)
 write.csv(train_processed, file = 'train_full.csv', row.names = F)
 write.csv(submit, file = 'submit.csv', row.names = F)
+
+## encoding 2
+library(plyr)
+str(submit_encoded2, list.len = ncol(submit_encoded2)) 
+
+submit2 <- submit
+submit2$loss <- NA
+submit2_cat <- submit2[, 1:116]
+submit2_num <- submit2[, 117:131]
+submit2_cat_conv <- data.frame(lapply(submit2_cat, as.character), 
+                               loss = submit2$loss, stringsAsFactors = FALSE)
+
+train2 <- train
+train2_cat <- train2[, 1:116]
+train2_num <- train2[, 117:131]
+train2_cat_conv <- data.frame(lapply(train2_cat, as.character),
+                              loss = train2$loss, stringsAsFactors = FALSE)
+
+full <- rbind(train2_cat_conv, submit2_cat_conv)
+
+find_different <- function(x, y) {
+    return(c(setdiff(x, y), setdiff(y, x)))
+}
+
+filter_cat <- function(x, remove) {
+    return(mapvalues(x, remove, rep('ZZ', length(remove))))
+}
+
+sum(sapply(full[, 1:116], function(x) sum(x == 'NA')))   ### before
+for (i in 1:116) {
+    remove <- find_different(train2_cat_conv[, i], submit2_cat_conv[, i])
+    if (length(remove) > 0) {
+        print(paste('========', i))
+        print(remove)
+        full[, i] <- filter_cat(full[, i], remove)
+        print('===================================================================')}
+}
+sum(sapply(full[, 1:116], function(x) sum(x == 'NA')))   ### after
+
+full_factorize <- data.frame(lapply(full[, 1:116], function(x) as.numeric(factor(x))),
+                             loss = full$loss, stringsAsFactors = FALSE)
+
+train_encoded2 <- cbind(full_factorize[!is.na(full_factorize$loss), 1:116], train2_num)
+submit_encoded2 <- cbind(full_factorize[is.na(full_factorize$loss), 1:116], submit2[, 117:130])
+
+train_version2 <- train_encoded2[train_index, ]
+test_version2 <- train_encoded2[test_index, ]
+submit_version2 <- submit_encoded2
+
+write.csv(train_version2, file = 'train_encode2.csv', row.names = F)
+write.csv(test_version2, file = 'test_encode2.csv', row.names = F)
+write.csv(train_encoded2, file = 'train_full_encode2.csv', row.names = F)
+write.csv(submit_version2, file = 'submit_encode2.csv', row.names = F)
+
+
+
+
 
 
 

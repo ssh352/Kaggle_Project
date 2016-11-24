@@ -7,13 +7,13 @@ from sklearn.ensemble import RandomForestRegressor
 ntrees = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
 SEED = 0
 
-train = pd.read_csv("train_proc.csv")
+train = pd.read_csv("train.csv")
 X = train.iloc[:, :-1]
 y = train.iloc[:, -1]
 # # print X, y
 #
 # # print len(train)
-# kf = KFold(len(train), n_folds=5, random_state=SEED)
+# kf = KFold(len(train), n_folds = 5, random_state = SEED)
 #
 # n_mae = []
 # for n in ntrees:
