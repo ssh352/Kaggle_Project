@@ -225,7 +225,17 @@ write.csv(test_version2, file = 'test_encode2_v2.csv', row.names = F)
 write.csv(train_encoded2, file = 'train_full_encode2_v2.csv', row.names = F)
 write.csv(submit_version2, file = 'submit_encode2_v2.csv', row.names = F)
 
+## subset train and test for NN
+str(submit_nn, list.len = ncol(train))
 
+train_nn <- train[sort(train_index), ]
+test_nn <- train[test_index, -132]
+train_full_nn <- train
+submit_nn <- submit
 
+write.csv(train_nn, file = 'train_nn_1.csv', row.names = F)
+write.csv(test_nn, file = 'test_nn_1.csv', row.names = F)
+write.csv(train_full_nn, file = 'train_nn_2.csv', row.names = F)
+write.csv(submit_nn, file = 'test_nn_2.csv', row.names = F)
 
 
