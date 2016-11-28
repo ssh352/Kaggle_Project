@@ -19,7 +19,7 @@ mean(abs(df$loss - df$e1_xb))    ###  1221.43
 mean(abs(df$loss - df$e2o_xb))   ###  1131.601
 mean(abs(df$loss - df$e3o_xb))   ###  1125.578
 
-e0_nn_s <- read.csv("Prediction/proc0_nn.csv")
+e0_nn_s <- read.csv("Prediction/proc0_nn_2.csv")
 #e1_xb_s <- read.csv("Prediction/proc_XGB2_1209.csv")
 e2o_xb_s <- read.csv("Prediction/proc2o_XGB_tAll.csv")
 e3o_xb_s <- read.csv("Prediction/proc3o_XGB_tAll_1108.csv")
@@ -67,7 +67,7 @@ pred_s <- exp(predict(stack_gbm_full, newdata = df_s, n.trees = 6400))
 
 submission <- read.csv("Prediction/sample_submission.csv")
 submission$loss <- as.numeric(pred_s)
-write.csv(submission, file = 'Nov27_64_2xb1nn_gbmstack4.csv', row.names = F)
+write.csv(submission, file = 'Nov27_64_2xb1nn_gbmstack5.csv', row.names = F)
 
 
 
